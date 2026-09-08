@@ -422,7 +422,7 @@ class _MoneyPlannerDialogState extends ConsumerState<MoneyPlannerDialog> {
     final transactions = ref.watch(filteredTransactionsProvider);
     final allTransactions = ref.watch(rawTransactionsProvider);
     final filters = ref.watch(transactionFiltersProvider);
-    final monthName = DateFormatter.formatSmartMonth(filters.selectedMonth);
+    final monthName = DateFormatter.formatMonthYear(filters.selectedMonth);
 
     // Calculate actual spending per subcategory
     final Map<String, double> subCatSpending = {};

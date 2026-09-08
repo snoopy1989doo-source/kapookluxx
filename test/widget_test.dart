@@ -8,6 +8,7 @@ import 'package:expense_tracker/models/savings_goal.dart';
 import 'package:expense_tracker/models/wallet.dart';
 import 'package:expense_tracker/services/bill_learning_service.dart';
 import 'package:expense_tracker/core/utils/name_helper.dart';
+import 'package:expense_tracker/providers/transaction_provider.dart';
 import 'package:expense_tracker/widgets/wallet/wallet_card.dart';
 import 'package:expense_tracker/widgets/wallet/wallet_icon.dart';
 import 'package:expense_tracker/widgets/common/app_picker_field.dart';
@@ -115,6 +116,29 @@ void main() {
       final dt = DateTime(2026, 9, 4, 14, 30);
       final timeStr = DateFormatter.formatTime(dt);
       expect(timeStr, '14:30 น.');
+    });
+  });
+
+  group('Month navigation tests', () {
+    test('moves from August to September and displays the month name', () {
+      final notifier = TransactionFiltersNotifier();
+      notifier.setMonth(DateTime(2026, 8, 1));
+
+      notifier.nextMonth();
+
+      expect(notifier.state.selectedMonth, DateTime(2026, 9, 1));
+      expect(DateFormatter.formatMonthYear(notifier.state.selectedMonth), contains('กันยายน'));
+      notifier.dispose();
+    });
+
+    test('moves correctly across a year boundary', () {
+      final notifier = TransactionFiltersNotifier();
+      notifier.setMonth(DateTime(2026, 12, 1));
+
+      notifier.nextMonth();
+
+      expect(notifier.state.selectedMonth, DateTime(2027, 1, 1));
+      notifier.dispose();
     });
   });
 

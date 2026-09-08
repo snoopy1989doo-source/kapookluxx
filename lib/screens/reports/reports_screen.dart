@@ -176,7 +176,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final goalsAsync = ref.watch(savingsGoalsStreamProvider);
 
     final theme = Theme.of(context);
-    final monthName = DateFormatter.formatSmartMonth(filters.selectedMonth);
+    final monthName = DateFormatter.formatMonthYear(filters.selectedMonth);
 
     // Dynamic resolution of User & Partner Name & Photo according to user's exact specification:
     // 1. Check partner's nickname

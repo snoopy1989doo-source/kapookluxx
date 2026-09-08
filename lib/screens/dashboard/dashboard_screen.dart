@@ -131,33 +131,42 @@ class DashboardScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        _buildAvatar(userProfile?.photoBase64, userName, AppColors.primary, size: 36),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              partnerProfile != null ? 'กระเป๋าคู่รัก 💕' : 'สวัสดีครับ 👋',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: theme.colorScheme.onSurface.withOpacity(0.55),
-                                fontWeight: FontWeight.w500,
-                              ),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          _buildAvatar(userProfile?.photoBase64, userName, AppColors.primary, size: 36),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  partnerProfile != null ? 'กระเป๋าคู่รัก 💕' : 'สวัสดีครับ 👋',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: theme.colorScheme.onSurface.withOpacity(0.55),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  partnerProfile != null ? '$userName & $partnerName' : userName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              partnerProfile != null ? '$userName & $partnerName' : userName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     // Month Controller Pill
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -172,23 +181,23 @@ class DashboardScreen extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          InkWell(
-                            onTap: () => filterNotifier.previousMonth(),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(Icons.chevron_left, size: 16),
-                            ),
+                          IconButton(
+                            onPressed: () => filterNotifier.previousMonth(),
+                            icon: const Icon(Icons.chevron_left, size: 18),
+                            tooltip: 'เดือนก่อนหน้า',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                           ),
                           Text(
-                            DateFormatter.formatSmartMonth(filters.selectedMonth),
+                            DateFormatter.formatMonthYear(filters.selectedMonth),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                           ),
-                          InkWell(
-                            onTap: () => filterNotifier.nextMonth(),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(Icons.chevron_right, size: 16),
-                            ),
+                          IconButton(
+                            onPressed: () => filterNotifier.nextMonth(),
+                            icon: const Icon(Icons.chevron_right, size: 18),
+                            tooltip: 'เดือนถัดไป',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                           ),
                         ],
                       ),

@@ -12,6 +12,7 @@ import '../../providers/wallet_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/couple_provider.dart';
+import '../../models/main_category.dart';
 import '../../models/transaction_item.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/date_formatter.dart';
@@ -19,6 +20,7 @@ import '../../services/merchant_learning_service.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 import '../../widgets/common/confirm_dialog.dart';
+import '../category/category_picker_screen.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final TransactionItem? transaction;
@@ -54,6 +56,32 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
   final List<Map<String, dynamic>> _splitItems = [];
 
   final _picker = ImagePicker();
+
+  bool _matchesTransactionType(MainCategory category) {
+    final id = category.id.toLowerCase();
+    final name = category.name.toLowerCase();
+    final isIncomeCategory = id.contains('income') ||
+        name.contains('รายรับ') ||
+        name.contains('เงินเดือน');
+    return _isIncome ? isIncomeCategory : !isIncomeCategory;
+  }
+
+  Future<CategorySelection?> _openCategoryPicker({
+    String? selectedMainCategoryId,
+    String? selectedSubCategoryId,
+  }) {
+    return Navigator.of(context).push<CategorySelection>(
+      MaterialPageRoute(
+        builder: (context) => CategoryPickerScreen(
+          isIncome: _isIncome,
+          selectedMainCategoryId: selectedMainCategoryId,
+          selectedSubCategoryId: selectedSubCategoryId,
+        ),
+      ),
+    );
+  }
+
+  String _categoryDisplayName(String name) => name.split(' (').first.trim();
 
   @override
   void initState() {
@@ -673,12 +701,11 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
   }
 
   void _addSplitItemDialog() {
-    final mainCats = ref.read(mainCategoriesProvider);
+    final mainCats = ref.read(mainCategoriesProvider).where(_matchesTransactionType).toList();
     final subCats = ref.read(subCategoriesProvider);
     String? tempMainCatId = _selectedMainCategoryId ?? (mainCats.isNotEmpty ? mainCats.first.id : null);
-    String? tempSubCatId = tempMainCatId != null
-        ? subCats.firstWhere((s) => s.mainCategoryId == tempMainCatId, orElse: () => subCats.first).id
-        : null;
+    final initialSubs = subCats.where((category) => category.mainCategoryId == tempMainCatId).toList();
+    String? tempSubCatId = _selectedSubCategoryId ?? (initialSubs.isNotEmpty ? initialSubs.first.id : null);
 
     final totalBill = double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0.0;
     final allocatedSum = _splitItems.fold<double>(0.0, (s, item) => s + (item['amount'] as double));
@@ -693,7 +720,10 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setSubState) {
-          final filteredSubs = subCats.where((s) => s.mainCategoryId == tempMainCatId).toList();
+          final liveMainCats = ref.read(mainCategoriesProvider);
+          final liveSubCats = ref.read(subCategoriesProvider);
+          final selectedMain = liveMainCats.where((category) => category.id == tempMainCatId).firstOrNull;
+          final selectedSub = liveSubCats.where((category) => category.id == tempSubCatId).firstOrNull;
 
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -748,23 +778,53 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                   ),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: tempMainCatId,
-                  decoration: const InputDecoration(labelText: 'หมวดหมู่หลัก', border: OutlineInputBorder()),
-                  items: mainCats.map((c) => DropdownMenuItem(value: c.id, child: Text('${c.emoji} ${c.name}'))).toList(),
-                  onChanged: (val) {
-                    setSubState(() {
-                      tempMainCatId = val;
-                      tempSubCatId = subCats.firstWhere((s) => s.mainCategoryId == val, orElse: () => subCats.first).id;
-                    });
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    final selection = await _openCategoryPicker(
+                      selectedMainCategoryId: tempMainCatId,
+                      selectedSubCategoryId: tempSubCatId,
+                    );
+                    if (selection != null) {
+                      setSubState(() {
+                        tempMainCatId = selection.mainCategoryId;
+                        tempSubCatId = selection.subCategoryId;
+                      });
+                    } else {
+                      final categoryStillExists = ref
+                          .read(subCategoriesProvider)
+                          .any((category) => category.id == tempSubCatId);
+                      if (!categoryStillExists) {
+                        setSubState(() {
+                          tempMainCatId = null;
+                          tempSubCatId = null;
+                        });
+                      }
+                    }
                   },
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: tempSubCatId,
-                  decoration: const InputDecoration(labelText: 'หมวดหมู่ย่อย', border: OutlineInputBorder()),
-                  items: filteredSubs.map((s) => DropdownMenuItem(value: s.id, child: Text('${s.emoji} ${s.name}'))).toList(),
-                  onChanged: (val) => setSubState(() => tempSubCatId = val),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'หมวดหมู่',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.chevron_right_rounded),
+                    ),
+                    isEmpty: selectedSub == null,
+                    child: selectedSub == null
+                        ? const Text('แตะเพื่อเลือกหมวดหมู่')
+                        : Row(
+                            children: [
+                              Text(selectedSub.emoji),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${_categoryDisplayName(selectedSub.name)} · ${selectedMain == null ? '' : _categoryDisplayName(selectedMain.name)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
               ],
             ),
@@ -1008,18 +1068,10 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
     final wallets = ref.watch(walletsProvider);
     final theme = Theme.of(context);
 
-    final filteredMainCats = mainCats.where((cat) {
-      if (_isIncome) {
-        return cat.id.contains('income') || cat.name.contains('รายรับ') || cat.name.contains('เงิน');
-      } else {
-        return !cat.id.contains('income') && !cat.name.contains('รายรับ');
-      }
-    }).toList()..sort((a, b) => a.order.compareTo(b.order));
-
-    final filteredSubCats = subCats
-        .where((sub) => sub.mainCategoryId == _selectedMainCategoryId)
-        .toList()
+    final filteredMainCats = mainCats.where(_matchesTransactionType).toList()
       ..sort((a, b) => a.order.compareTo(b.order));
+    final selectedMainCategory = mainCats.where((category) => category.id == _selectedMainCategoryId).firstOrNull;
+    final selectedSubCategory = subCats.where((category) => category.id == _selectedSubCategoryId).firstOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -1443,57 +1495,75 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                     ),
                     const SizedBox(height: 20),
 
-                    // Main & Sub Category Selector dropdowns (if NOT Split Bill mode)
+                    // One-tap category picker (if NOT Split Bill mode)
                     if (!_isSplitBill) ...[
-                      DropdownButtonFormField<String>(
-                        value: _selectedMainCategoryId,
-                        decoration: const InputDecoration(labelText: 'หมวดหมู่หลัก'),
-                        items: filteredMainCats.map((cat) {
-                          return DropdownMenuItem<String>(
-                            value: cat.id,
-                            child: Row(
-                              children: [
-                                Text(cat.emoji),
-                                const SizedBox(width: 8),
-                                Text(cat.name),
-                              ],
-                            ),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () async {
+                          final selection = await _openCategoryPicker(
+                            selectedMainCategoryId: _selectedMainCategoryId,
+                            selectedSubCategoryId: _selectedSubCategoryId,
                           );
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedMainCategoryId = val;
-                            _selectedSubCategoryId = null;
-                          });
+                          if (!mounted) return;
+                          if (selection != null) {
+                            setState(() {
+                              _selectedMainCategoryId = selection.mainCategoryId;
+                              _selectedSubCategoryId = selection.subCategoryId;
+                            });
+                          } else {
+                            final categoryStillExists = ref
+                                .read(subCategoriesProvider)
+                                .any((category) => category.id == _selectedSubCategoryId);
+                            if (!categoryStillExists) {
+                              setState(() {
+                                _selectedMainCategoryId = null;
+                                _selectedSubCategoryId = null;
+                              });
+                            }
+                          }
                         },
-                      ),
-                      const SizedBox(height: 16),
-
-                      DropdownButtonFormField<String>(
-                        value: _selectedSubCategoryId,
-                        decoration: const InputDecoration(labelText: 'หมวดหมู่ย่อย'),
-                        disabledHint: const Text('กรุณาเลือกหมวดหมู่หลักก่อน'),
-                        items: _selectedMainCategoryId == null
-                            ? []
-                            : filteredSubCats.map((sub) {
-                                return DropdownMenuItem<String>(
-                                  value: sub.id,
-                                  child: Row(
-                                    children: [
-                                      Text(sub.emoji),
-                                      const SizedBox(width: 8),
-                                      Text(sub.name),
-                                    ],
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'หมวดหมู่',
+                            prefixIcon: selectedSubCategory == null
+                                ? const Icon(Icons.category_outlined)
+                                : Center(
+                                    widthFactor: 1,
+                                    child: Text(selectedSubCategory.emoji, style: const TextStyle(fontSize: 22)),
                                   ),
-                                );
-                              }).toList(),
-                        onChanged: _selectedMainCategoryId == null
-                            ? null
-                            : (val) {
-                                setState(() {
-                                  _selectedSubCategoryId = val;
-                                });
-                              },
+                            suffixIcon: const Icon(Icons.chevron_right_rounded),
+                          ),
+                          isEmpty: selectedSubCategory == null,
+                          child: selectedSubCategory == null
+                              ? Text(
+                                  filteredMainCats.isEmpty
+                                      ? 'ยังไม่มีหมวดหมู่สำหรับรายการนี้'
+                                      : 'แตะเพื่อเลือกหมวดหมู่',
+                                  style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.58)),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _categoryDisplayName(selectedSubCategory.name),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    if (selectedMainCategory != null)
+                                      Text(
+                                        _categoryDisplayName(selectedMainCategory.name),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: theme.colorScheme.onSurface.withOpacity(0.55),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/wallet_provider.dart';
 import '../../models/wallet.dart';
 import 'wallet_card.dart';
+import '../../screens/wallet/wallet_management_screen.dart';
 
 class WalletSelectorSheet extends ConsumerWidget {
   final Wallet? selectedWallet;
@@ -43,12 +44,25 @@ class WalletSelectorSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
-            'เลือกกระเป๋าเงิน',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'เลือกกระเป๋าเงิน',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => const WalletManagementScreen()),
+                  );
+                },
+                icon: const Icon(Icons.tune_rounded, size: 18),
+                label: const Text('จัดการ'),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           if (wallets.isEmpty)
@@ -68,7 +82,7 @@ class WalletSelectorSheet extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final wallet = wallets[index];
                   final isSelected = selectedWallet?.id == wallet.id;
-                  
+
                   return WalletCard(
                     wallet: wallet,
                     isSelected: isSelected,
@@ -86,12 +100,12 @@ class WalletSelectorSheet extends ConsumerWidget {
     );
   }
 
-  static void show(
+  static Future<void> show(
     BuildContext context, {
     required Wallet? selectedWallet,
     required ValueChanged<Wallet> onWalletSelected,
   }) {
-    showModalBottomSheet(
+    return showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(

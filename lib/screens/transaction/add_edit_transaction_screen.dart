@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,9 @@ import '../../services/merchant_learning_service.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 import '../../widgets/common/confirm_dialog.dart';
+import '../../widgets/common/app_picker_field.dart';
+import '../../widgets/wallet/wallet_icon.dart';
+import '../../widgets/wallet/wallet_selector_sheet.dart';
 import '../category/category_picker_screen.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
@@ -49,7 +53,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
   final List<String> _receiptImagesList = []; // Multi-image support
   bool _isScanningSlip = false; // Scanning animation state
   bool _isSaving = false;
-  String? _detectedReceiverName; // AI Merchant / Receiver Quiet Memory
+  String? _detectedReceiverName; // Merchant / receiver memory used after OCR
 
   // Split Bill / Multi-Category Breakdown mode 🔀
   bool _isSplitBill = false;
@@ -178,6 +182,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
 
   Future<void> _analyzeSlipAndAutoFill(String fileName, Uint8List bytes, String base64Str) async {
     setState(() => _isScanningSlip = true);
+    _detectedReceiverName = null;
     final mainCats = ref.read(mainCategoriesProvider);
     final subCats = ref.read(subCategoriesProvider);
     final coupleRoomId = ref.read(coupleRoomIdProvider);
@@ -237,7 +242,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
     String? matchedCategory;
     String? matchedSubCategory;
     String? matchedWallet;
-    String? aiMemoryReason;
+    String? memoryReason;
     double? matchedAmount;
 
     // Tier 1: Direct match from QR Tag 54 payload e.g. "จำนวนเงิน 130.00 บาท"
@@ -285,7 +290,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
       }
     }
 
-    // Auto-detect Receiver / Shop Name for AI Learning (Background Only, DO NOT pollute Note)
+    // Detect the receiver/shop for local and shared merchant memory.
     final receiverRegexes = [
       RegExp(r'ถุงเงิน\s*\(([ก-๙a-zA-Z\.\s]+)\)'),
       RegExp(r'(?:ไปยัง|ผู้รับ|to)\s*:?\s*([ก-๙a-zA-Z\.\(\)\s]{3,35})', caseSensitive: false),
@@ -302,13 +307,19 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
       }
     }
 
-    // AI Prediction from learned memory (including Wallet & Subcategory)
+    // Reuse the most common valid category and wallet from this merchant's history.
     if (_detectedReceiverName != null) {
       final memory = await MerchantLearningService.predictCategory(
         receiverOrMerchantName: _detectedReceiverName!,
         householdId: coupleRoomId,
       );
-      if (memory != null && memory.mainCategoryId.isNotEmpty) {
+      final mainCategoryExists = memory != null &&
+          mainCats.any((category) => category.id == memory.mainCategoryId);
+      final subCategoryExists = memory?.subCategoryId == null ||
+          subCats.any((category) =>
+              category.id == memory!.subCategoryId &&
+              category.mainCategoryId == memory.mainCategoryId);
+      if (memory != null && mainCategoryExists && subCategoryExists) {
         matchedCategory = memory.mainCategoryId;
         matchedSubCategory = memory.subCategoryId;
         if (memory.walletId != null && memory.walletId!.isNotEmpty) {
@@ -319,8 +330,8 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
         }
         final walletObj = ref.read(walletsProvider).where((w) => w.id == matchedWallet).firstOrNull;
         final subObj = subCats.where((s) => s.id == matchedSubCategory).firstOrNull;
-        aiMemoryReason = '✨ จำร้านนี้ได้: "$_detectedReceiverName"${walletObj != null ? " จ่ายด้วย ${walletObj.name}" : ""}${subObj != null ? " ในหมวด ${subObj.name}" : ""}';
-        debugPrint('✨ AI predicted category & wallet from memory for $_detectedReceiverName');
+        memoryReason = '✨ จำร้านนี้ได้: "$_detectedReceiverName"${walletObj != null ? " จ่ายด้วย ${walletObj.name}" : ""}${subObj != null ? " ในหมวด ${subObj.name}" : ""}';
+        debugPrint('Merchant memory matched $_detectedReceiverName');
       }
     }
 
@@ -499,8 +510,8 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
       }
 
       String successMsg;
-      if (aiMemoryReason != null) {
-        successMsg = aiMemoryReason;
+      if (memoryReason != null) {
+        successMsg = memoryReason;
       } else if (matchedAmount != null) {
         if (_receiptImagesList.length > 1 && finalTotalAmount != null) {
           successMsg = '✨ อ่านสลิปเพิ่มสำเร็จ! (+฿${matchedAmount.toStringAsFixed(2)}) รวมยอดบิลเป็น ฿${finalTotalAmount.toStringAsFixed(2)}';
@@ -778,8 +789,17 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                   ),
                 ),
                 const SizedBox(height: 12),
-                InkWell(
-                  borderRadius: BorderRadius.circular(12),
+                AppPickerField(
+                  label: 'หมวดหมู่',
+                  title: selectedSub == null
+                      ? 'แตะเพื่อเลือกหมวดหมู่'
+                      : _categoryDisplayName(selectedSub.name),
+                  subtitle: selectedMain == null
+                      ? null
+                      : _categoryDisplayName(selectedMain.name),
+                  leading: selectedSub == null
+                      ? const Icon(Icons.category_outlined)
+                      : Text(selectedSub.emoji, style: const TextStyle(fontSize: 22)),
                   onTap: () async {
                     final selection = await _openCategoryPicker(
                       selectedMainCategoryId: tempMainCatId,
@@ -802,29 +822,6 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                       }
                     }
                   },
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'หมวดหมู่',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.chevron_right_rounded),
-                    ),
-                    isEmpty: selectedSub == null,
-                    child: selectedSub == null
-                        ? const Text('แตะเพื่อเลือกหมวดหมู่')
-                        : Row(
-                            children: [
-                              Text(selectedSub.emoji),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  '${_categoryDisplayName(selectedSub.name)} · ${selectedMain == null ? '' : _categoryDisplayName(selectedMain.name)}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
                 ),
               ],
             ),
@@ -1013,16 +1010,16 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
         }
       }
 
-      // Quiet Background AI Merchant Learning (Max 5 samples per receiver name)
+      // Save the latest five choices for this merchant without delaying navigation.
       if (_detectedReceiverName != null && _selectedMainCategoryId != null) {
         final coupleRoomId = ref.read(coupleRoomIdProvider);
-        MerchantLearningService.learnMerchantCategory(
+        unawaited(MerchantLearningService.learnMerchantCategory(
           receiverOrMerchantName: _detectedReceiverName!,
           mainCategoryId: _selectedMainCategoryId!,
           subCategoryId: _selectedSubCategoryId,
           walletId: _selectedWalletId,
           householdId: coupleRoomId,
-        );
+        ));
       }
 
       if (mounted) {
@@ -1072,6 +1069,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
       ..sort((a, b) => a.order.compareTo(b.order));
     final selectedMainCategory = mainCats.where((category) => category.id == _selectedMainCategoryId).firstOrNull;
     final selectedSubCategory = subCats.where((category) => category.id == _selectedSubCategoryId).firstOrNull;
+    final selectedWallet = wallets.where((wallet) => wallet.id == _selectedWalletId).firstOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -1497,8 +1495,19 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
 
                     // One-tap category picker (if NOT Split Bill mode)
                     if (!_isSplitBill) ...[
-                      InkWell(
-                        borderRadius: BorderRadius.circular(12),
+                      AppPickerField(
+                        label: 'หมวดหมู่',
+                        title: selectedSubCategory == null
+                            ? (filteredMainCats.isEmpty
+                                ? 'ยังไม่มีหมวดหมู่สำหรับรายการนี้'
+                                : 'แตะเพื่อเลือกหมวดหมู่')
+                            : _categoryDisplayName(selectedSubCategory.name),
+                        subtitle: selectedMainCategory == null
+                            ? null
+                            : _categoryDisplayName(selectedMainCategory.name),
+                        leading: selectedSubCategory == null
+                            ? const Icon(Icons.category_outlined)
+                            : Text(selectedSubCategory.emoji, style: const TextStyle(fontSize: 22)),
                         onTap: () async {
                           final selection = await _openCategoryPicker(
                             selectedMainCategoryId: _selectedMainCategoryId,
@@ -1522,77 +1531,33 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                             }
                           }
                         },
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'หมวดหมู่',
-                            prefixIcon: selectedSubCategory == null
-                                ? const Icon(Icons.category_outlined)
-                                : Center(
-                                    widthFactor: 1,
-                                    child: Text(selectedSubCategory.emoji, style: const TextStyle(fontSize: 22)),
-                                  ),
-                            suffixIcon: const Icon(Icons.chevron_right_rounded),
-                          ),
-                          isEmpty: selectedSubCategory == null,
-                          child: selectedSubCategory == null
-                              ? Text(
-                                  filteredMainCats.isEmpty
-                                      ? 'ยังไม่มีหมวดหมู่สำหรับรายการนี้'
-                                      : 'แตะเพื่อเลือกหมวดหมู่',
-                                  style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.58)),
-                                )
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _categoryDisplayName(selectedSubCategory.name),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    if (selectedMainCategory != null)
-                                      Text(
-                                        _categoryDisplayName(selectedMainCategory.name),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: theme.colorScheme.onSurface.withOpacity(0.55),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
 
-                    // Wallet Selector dropdown
-                    DropdownButtonFormField<String>(
-                      value: _selectedWalletId,
-                      decoration: const InputDecoration(labelText: 'เลือกกระเป๋าเงิน'),
-                      items: wallets.map((wallet) {
-                        return DropdownMenuItem<String>(
-                          value: wallet.id,
-                          child: Row(
-                            children: [
-                              Icon(
-                                wallet.icon == 'account_balance'
-                                    ? Icons.account_balance
-                                    : (wallet.icon == 'payments' ? Icons.payments : Icons.credit_card),
-                                color: AppColors.fromHex(wallet.color),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(wallet.name),
-                            ],
-                          ),
+                    // Visual wallet picker with per-wallet emoji and color.
+                    AppPickerField(
+                      label: 'กระเป๋าเงิน',
+                      title: selectedWallet?.name ?? 'แตะเพื่อเลือกกระเป๋าเงิน',
+                      leading: WalletIcon(
+                        value: selectedWallet?.icon ?? 'account_balance_wallet',
+                        color: selectedWallet == null
+                            ? theme.colorScheme.onSurfaceVariant
+                            : AppColors.fromHex(selectedWallet.color),
+                        size: 22,
+                      ),
+                      onTap: () async {
+                        await WalletSelectorSheet.show(
+                          context,
+                          selectedWallet: selectedWallet,
+                          onWalletSelected: (wallet) {
+                            setState(() => _selectedWalletId = wallet.id);
+                          },
                         );
-                      }).toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedWalletId = val;
-                        });
+                        if (!mounted) return;
+                        if (!ref.read(walletsProvider).any((wallet) => wallet.id == _selectedWalletId)) {
+                          setState(() => _selectedWalletId = null);
+                        }
                       },
                     ),
                     const SizedBox(height: 20),

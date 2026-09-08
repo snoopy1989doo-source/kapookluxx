@@ -8,6 +8,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../widgets/common/confirm_dialog.dart';
 import '../../widgets/category/color_picker_dialog.dart';
+import '../../widgets/category/emoji_picker_dialog.dart';
+import '../../widgets/wallet/wallet_icon.dart';
 
 class WalletManagementScreen extends ConsumerStatefulWidget {
   const WalletManagementScreen({super.key});
@@ -143,7 +145,7 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
                   ],
 
                   DropdownButtonFormField<String>(
-                    value: _selectedIcon,
+                    value: WalletIcon.materialValues.contains(_selectedIcon) ? _selectedIcon : null,
                     decoration: const InputDecoration(labelText: 'สัญลักษณ์'),
                     items: const [
                       DropdownMenuItem(value: 'account_balance_wallet', child: Row(children: [Icon(Icons.account_balance_wallet), SizedBox(width: 8), Text('กระเป๋าเงิน')])),
@@ -156,6 +158,18 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
                         setDialogState(() => _selectedIcon = val);
                       }
                     },
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => EmojiPickerDialog.show(context, (emoji) {
+                      setDialogState(() => _selectedIcon = emoji);
+                    }),
+                    icon: WalletIcon(value: _selectedIcon, color: _dialogColor, size: 24),
+                    label: Text(
+                      WalletIcon.isEmoji(_selectedIcon)
+                          ? 'อีโมจิที่เลือก: $_selectedIcon'
+                          : 'เลือกอีโมจิแทนไอคอน',
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -234,20 +248,6 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
   Widget build(BuildContext context) {
     final wallets = ref.watch(walletsProvider);
 
-    IconData getIcon(String iconName) {
-      switch (iconName) {
-        case 'account_balance':
-          return Icons.account_balance;
-        case 'payments':
-          return Icons.payments;
-        case 'credit_card':
-          return Icons.credit_card;
-        case 'account_balance_wallet':
-        default:
-          return Icons.account_balance_wallet;
-      }
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('กระเป๋าเงิน'),
@@ -311,7 +311,7 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: wColor.withOpacity(0.12),
-                            child: Icon(getIcon(wallet.icon), color: wColor),
+                            child: WalletIcon(value: wallet.icon, color: wColor),
                           ),
                           title: Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Column(

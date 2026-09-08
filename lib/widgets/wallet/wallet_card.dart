@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/wallet.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/currency_formatter.dart';
+import 'wallet_icon.dart';
 
 class WalletCard extends StatelessWidget {
   final Wallet wallet;
@@ -20,31 +21,22 @@ class WalletCard extends StatelessWidget {
     final theme = Theme.of(context);
     final walletColor = AppColors.fromHex(wallet.color);
 
-    // Map icon string to Material Icons
-    IconData getIcon(String iconName) {
-      switch (iconName) {
-        case 'account_balance':
-          return Icons.account_balance;
-        case 'payments':
-          return Icons.payments;
-        case 'credit_card':
-          return Icons.credit_card;
-        case 'account_balance_wallet':
-        default:
-          return Icons.account_balance_wallet;
-      }
-    }
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 164,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: theme.brightness == Brightness.light ? Colors.white : AppColors.cardDark,
+          color: theme.brightness == Brightness.light
+              ? Colors.white
+              : AppColors.cardDark,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? walletColor : (theme.brightness == Brightness.light ? AppColors.dividerLight : AppColors.dividerDark),
+            color: isSelected
+                ? walletColor
+                : (theme.brightness == Brightness.light
+                    ? AppColors.dividerLight
+                    : AppColors.dividerDark),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -68,11 +60,8 @@ class WalletCard extends StatelessWidget {
                     color: walletColor.withOpacity(0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    getIcon(wallet.icon),
-                    color: walletColor,
-                    size: 20,
-                  ),
+                  child: WalletIcon(
+                      value: wallet.icon, color: walletColor, size: 20),
                 ),
                 if (isSelected)
                   Icon(
@@ -107,7 +96,9 @@ class WalletCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: wallet.currentBalance >= 0 ? theme.colorScheme.onSurface : AppColors.expense,
+                        color: wallet.currentBalance >= 0
+                            ? theme.colorScheme.onSurface
+                            : AppColors.expense,
                       ),
                       maxLines: 1,
                     ),

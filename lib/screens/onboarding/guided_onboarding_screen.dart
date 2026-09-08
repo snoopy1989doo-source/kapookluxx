@@ -8,6 +8,7 @@ import '../../models/wallet.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/category/color_picker_dialog.dart';
 import '../../widgets/category/emoji_picker_dialog.dart';
+import '../../widgets/wallet/wallet_icon.dart';
 
 class GuidedOnboardingScreen extends ConsumerStatefulWidget {
   const GuidedOnboardingScreen({super.key});
@@ -252,7 +253,7 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedIcon,
+                value: WalletIcon.materialValues.contains(selectedIcon) ? selectedIcon : null,
                 decoration: const InputDecoration(labelText: 'สัญลักษณ์'),
                 items: const [
                   DropdownMenuItem(value: 'account_balance_wallet', child: Row(children: [Icon(Icons.account_balance_wallet), SizedBox(width: 8), Text('กระเป๋าเงิน')])),
@@ -265,6 +266,18 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
                     setDialogState(() => selectedIcon = val);
                   }
                 },
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => EmojiPickerDialog.show(context, (emoji) {
+                  setDialogState(() => selectedIcon = emoji);
+                }),
+                icon: WalletIcon(value: selectedIcon, color: _selectedColor, size: 24),
+                label: Text(
+                  WalletIcon.isEmoji(selectedIcon)
+                      ? 'อีโมจิที่เลือก: $selectedIcon'
+                      : 'เลือกอีโมจิแทนไอคอน',
+                ),
               ),
               const SizedBox(height: 16),
               Row(
@@ -514,10 +527,7 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
                         children: [
                           CircleAvatar(
                             backgroundColor: wColor.withOpacity(0.12),
-                            child: Icon(
-                              wallet.icon == 'account_balance' ? Icons.account_balance : Icons.payments,
-                              color: wColor,
-                            ),
+                            child: WalletIcon(value: wallet.icon, color: wColor),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -605,10 +615,7 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
                     const Text('🏦 กระเป๋าเงินของคุณ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                     const SizedBox(height: 8),
                     ...onboardingState.selectedWallets.map((w) => ListTile(
-                      leading: Icon(
-                        w.icon == 'account_balance' ? Icons.account_balance : Icons.payments,
-                        color: AppColors.fromHex(w.color),
-                      ),
+                      leading: WalletIcon(value: w.icon, color: AppColors.fromHex(w.color)),
                       dense: true,
                       title: Text(w.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                       trailing: Text(

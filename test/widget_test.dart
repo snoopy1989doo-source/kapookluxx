@@ -9,6 +9,8 @@ import 'package:expense_tracker/models/wallet.dart';
 import 'package:expense_tracker/services/bill_learning_service.dart';
 import 'package:expense_tracker/core/utils/name_helper.dart';
 import 'package:expense_tracker/widgets/wallet/wallet_card.dart';
+import 'package:expense_tracker/widgets/wallet/wallet_icon.dart';
+import 'package:expense_tracker/widgets/common/app_picker_field.dart';
 
 void main() {
   setUpAll(() async {
@@ -59,6 +61,46 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('123,456,789,012.34 ฿'), findsOneWidget);
+    });
+  });
+
+  group('Compact picker layout tests', () {
+    testWidgets('keeps category text separated at mobile width', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppPickerField(
+              label: 'หมวดหมู่',
+              title: 'ค่าน้ำ / ชา / กาแฟ / ขนมที่มีชื่อยาวมาก',
+              subtitle: 'การใช้ชีวิตและที่พักอาศัย',
+              leading: const Text('🥤'),
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('หมวดหมู่'), findsOneWidget);
+      expect(find.text('ค่าน้ำ / ชา / กาแฟ / ขนมที่มีชื่อยาวมาก'), findsOneWidget);
+    });
+
+    testWidgets('renders a custom wallet emoji', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: WalletIcon(value: '🐷', color: Colors.pink),
+          ),
+        ),
+      );
+
+      expect(find.text('🐷'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 

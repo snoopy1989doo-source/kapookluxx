@@ -269,7 +269,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ConfirmDialog.show(
         context,
         title: 'ออกจากระบบ',
-        content: 'คุณแน่ใจว่าต้องการออกจากระบบบัญชีปัจจุบันหรือไม่?',
+        content: 'คุณแน่ใจว่าต้องการออกจากระบบของผู้ใช้ปัจจุบันหรือไม่?',
         confirmText: 'ออกจากระบบ',
         confirmColor: AppColors.expense,
         onConfirm: () {
@@ -481,7 +481,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   color: AppColors.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: const Text('ฉัน (บัญชีนี้)', style: TextStyle(fontSize: 9, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                                child: const Text('ฉัน (โปรไฟล์นี้)', style: TextStyle(fontSize: 9, color: AppColors.primary, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
@@ -628,7 +628,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // ─── SECTION 1: FINANCIAL CATEGORIES & WALLETS ───
           _buildSectionCard(
             context: context,
-            title: 'หมวดหมู่ & บัญชี',
+            title: 'หมวดหมู่ & กระเป๋าเงิน',
             children: [
               _buildSettingTile(
                 context: context,
@@ -649,8 +649,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: Icons.account_balance_wallet_rounded,
                 iconColor: const Color(0xFF3182CE),
                 iconBgColor: const Color(0xFF3182CE).withOpacity(0.12),
-                title: 'กระเป๋าเงิน & บัญชี',
-                subtitle: 'จัดการบัญชีและยอดคงเหลือ',
+                title: 'กระเป๋าเงิน',
+                subtitle: 'จัดการกระเป๋าเงินและยอดคงเหลือ',
                 showDivider: false,
                 onTap: () {
                   Navigator.push(
@@ -690,7 +690,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // ─── SECTION 3: DATA & ACCOUNT ───
           _buildSectionCard(
             context: context,
-            title: 'จัดการข้อมูล & บัญชี',
+            title: 'ข้อมูลและการใช้งาน',
             children: [
               _buildSettingTile(
                 context: context,
@@ -728,7 +728,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // Footer Info
           Center(
             child: Text(
-              'บัญชี: ${userProfile?.email ?? authState.userId ?? "ผู้ใช้"} • Kapookluxx v1.0.0',
+              'ผู้ใช้: ${userProfile?.email ?? authState.userId ?? "ผู้ใช้"} • Kapookluxx v1.0.0',
               style: TextStyle(
                 fontSize: 11,
                 color: theme.colorScheme.onSurface.withOpacity(0.4),

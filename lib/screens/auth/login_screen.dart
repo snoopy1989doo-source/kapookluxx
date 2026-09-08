@@ -207,22 +207,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     isLoading: authState.status == AuthStatus.loading && !_googleLoading,
                     onPressed: _submit,
                   ),
-                  const SizedBox(height: 16),
-
-                  // Guest Mode
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      ref.read(authNotifierProvider.notifier).loginAsGuest();
-                    },
-                    icon: const Icon(Icons.person_outline),
-                    label: const Text('เข้าใช้งานแบบทดลอง (ไม่บันทึกข้อมูล)'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 24),
 
                   // Register redirect

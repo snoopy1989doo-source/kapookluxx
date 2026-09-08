@@ -265,11 +265,4 @@ class CoupleRepository {
     }, SetOptions(merge: true));
   }
 
-  /// Sync Gemini API Key to couple room across all devices
-  Future<void> updateGeminiApiKey(String roomId, String apiKey) async {
-    if (!_isAvailable) return;
-    await _firestore!.collection('couple_rooms').doc(roomId).set({
-      'geminiApiKey': apiKey,
-    }, SetOptions(merge: true));
-  }
 }

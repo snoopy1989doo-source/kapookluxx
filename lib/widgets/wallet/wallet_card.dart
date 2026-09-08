@@ -38,8 +38,8 @@ class WalletCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 155,
-        padding: const EdgeInsets.all(16),
+        width: 164,
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: theme.brightness == Brightness.light ? Colors.white : AppColors.cardDark,
           borderRadius: BorderRadius.circular(16),
@@ -82,7 +82,7 @@ class WalletCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -97,15 +97,21 @@ class WalletCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  CurrencyFormatter.format(wallet.currentBalance),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: wallet.currentBalance >= 0 ? theme.colorScheme.onSurface : AppColors.expense,
+                SizedBox(
+                  width: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      CurrencyFormatter.format(wallet.currentBalance),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: wallet.currentBalance >= 0 ? theme.colorScheme.onSurface : AppColors.expense,
+                      ),
+                      maxLines: 1,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

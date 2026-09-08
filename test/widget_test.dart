@@ -1,11 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/date_formatter.dart';
 import 'package:expense_tracker/models/transaction_item.dart';
 import 'package:expense_tracker/models/savings_goal.dart';
+import 'package:expense_tracker/models/wallet.dart';
 import 'package:expense_tracker/services/bill_learning_service.dart';
 import 'package:expense_tracker/core/utils/name_helper.dart';
+import 'package:expense_tracker/widgets/wallet/wallet_card.dart';
 
 void main() {
   setUpAll(() async {
@@ -27,6 +30,35 @@ void main() {
     test('formats compact and integer correctly', () {
       expect(CurrencyFormatter.formatInteger(1500.99), '1,501 ฿');
       expect(CurrencyFormatter.formatNoSymbol(1250.5), '1,250.50');
+    });
+  });
+
+  group('WalletCard Layout Tests', () {
+    testWidgets('keeps a large balance inside a compact card', (tester) async {
+      final wallet = Wallet(
+        id: 'large-balance',
+        name: 'กระเป๋าหลักสำหรับค่าใช้จ่ายร่วมกัน',
+        color: '#3182CE',
+        icon: 'account_balance_wallet',
+        startingBalance: 123456789012.34,
+        currentBalance: 123456789012.34,
+        order: 0,
+        createdAt: DateTime(2026, 9, 8),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 126,
+              child: WalletCard(wallet: wallet),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('123,456,789,012.34 ฿'), findsOneWidget);
     });
   });
 

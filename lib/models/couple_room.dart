@@ -11,7 +11,6 @@ class CoupleRoom {
   final Map<String, Map<String, dynamic>> membersInfo; // {userId: {nickname, email, photoBase64}}
   final List<String> deletedDefaultFood;
   final List<String> deletedDefaultQuests;
-  final String? geminiApiKey;
 
   CoupleRoom({
     required this.id,
@@ -26,7 +25,6 @@ class CoupleRoom {
     this.membersInfo = const {},
     this.deletedDefaultFood = const [],
     this.deletedDefaultQuests = const [],
-    this.geminiApiKey,
   });
 
   bool get isFull => memberIds.length >= 2;
@@ -78,7 +76,6 @@ class CoupleRoom {
       membersInfo: membersInfo,
       deletedDefaultFood: List<String>.from(map['deletedDefaultFood'] as List? ?? []),
       deletedDefaultQuests: List<String>.from(map['deletedDefaultQuests'] as List? ?? []),
-      geminiApiKey: map['geminiApiKey'] as String?,
     );
   }
 
@@ -95,7 +92,6 @@ class CoupleRoom {
       'membersInfo': membersInfo,
       'deletedDefaultFood': deletedDefaultFood,
       'deletedDefaultQuests': deletedDefaultQuests,
-      if (geminiApiKey != null) 'geminiApiKey': geminiApiKey,
     };
   }
 }

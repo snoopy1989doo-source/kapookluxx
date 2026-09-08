@@ -225,14 +225,19 @@ class DashboardScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'ยอดเงินคงเหลือรวมทุกบัญชี 💰',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          const Expanded(
+                            child: Text(
+                              'ยอดคงเหลือรวมทุกกระเป๋า 💰',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
@@ -240,20 +245,28 @@ class DashboardScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              '${wallets.length} บัญชี',
+                              '${wallets.length} กระเป๋า',
                               style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        CurrencyFormatter.format(totalAssets),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
+                      SizedBox(
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            CurrencyFormatter.format(totalAssets),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
+                            maxLines: 1,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -282,10 +295,14 @@ class DashboardScreen extends ConsumerWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Text('รายรับเดือนนี้', style: TextStyle(fontSize: 10, color: Colors.white70)),
-                                        Text(
-                                          CurrencyFormatter.format(report.totalIncome),
-                                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                                          overflow: TextOverflow.ellipsis,
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            CurrencyFormatter.format(report.totalIncome),
+                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                            maxLines: 1,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -310,10 +327,14 @@ class DashboardScreen extends ConsumerWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Text('รายจ่ายเดือนนี้', style: TextStyle(fontSize: 10, color: Colors.white70)),
-                                        Text(
-                                          CurrencyFormatter.format(report.totalExpense),
-                                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                                          overflow: TextOverflow.ellipsis,
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            CurrencyFormatter.format(report.totalExpense),
+                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                            maxLines: 1,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -608,7 +629,7 @@ class DashboardScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'กระเป๋าเงิน / บัญชี',
+                      'กระเป๋าเงิน',
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
@@ -621,24 +642,26 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 if (wallets.isEmpty)
-                  const Center(child: Text('ไม่มีบัญชีผู้ใช้'))
+                  const Center(child: Text('ยังไม่มีกระเป๋าเงิน'))
                 else
                   SizedBox(
-                    height: 110,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: wallets.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 10),
-                      itemBuilder: (context, index) {
-                        final wallet = wallets[index];
-                        return WalletCard(
-                          wallet: wallet,
-                          onTap: () {
-                            filterNotifier.setWallet(wallet.id);
-                            onNavigateToTransactions();
-                          },
-                        );
-                      },
+                    height: 126,
+                    child: RepaintBoundary(
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: wallets.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          final wallet = wallets[index];
+                          return WalletCard(
+                            wallet: wallet,
+                            onTap: () {
+                              filterNotifier.setWallet(wallet.id);
+                              onNavigateToTransactions();
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 const SizedBox(height: 18),

@@ -37,7 +37,7 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<List<MainCategory>> getMainCategories(String roomId) async {
-    if (_useLocalMock || roomId == 'guest_user') return _getLocalMainCategories(roomId);
+    if (_useLocalMock) return _getLocalMainCategories(roomId);
     try {
       final snapshot = await _roomColl(roomId, 'mainCategories').orderBy('order').get();
       if (snapshot.docs.isEmpty) {
@@ -54,7 +54,7 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> saveMainCategory(String roomId, MainCategory category) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _saveLocalMainCategory(roomId, category);
       return;
     }
@@ -69,7 +69,7 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> deleteMainCategory(String roomId, String categoryId) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _deleteLocalMainCategory(roomId, categoryId);
       return;
     }
@@ -88,7 +88,7 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<List<SubCategory>> getSubCategories(String roomId) async {
-    if (_useLocalMock || roomId == 'guest_user') return _getLocalSubCategories(roomId);
+    if (_useLocalMock) return _getLocalSubCategories(roomId);
     try {
       final snapshot = await _roomColl(roomId, 'subCategories').orderBy('order').get();
       return snapshot.docs
@@ -101,7 +101,7 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> saveSubCategory(String roomId, SubCategory category) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _saveLocalSubCategory(roomId, category);
       return;
     }
@@ -116,7 +116,7 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> deleteSubCategory(String roomId, String subCategoryId) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _deleteLocalSubCategory(roomId, subCategoryId);
       return;
     }

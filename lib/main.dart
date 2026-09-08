@@ -82,13 +82,6 @@ class MyApp extends ConsumerWidget {
         data: (userId) {
           if (userId == null) {
             return const LoginScreen();
-          } else if (userId == 'guest_user') {
-            // Guest mode directly enters onboarding/main screen
-            if (onboardingCompleted) {
-              return const MainNavigationScreen();
-            } else {
-              return const GuidedOnboardingScreen();
-            }
           } else {
             // Check couple room profile status
             return userProfileAsync.when(

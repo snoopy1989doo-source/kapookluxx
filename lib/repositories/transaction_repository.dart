@@ -32,7 +32,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
 
   @override
   Future<List<TransactionItem>> getTransactions(String roomId) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       return _getLocalTransactions(roomId);
     }
     try {
@@ -53,7 +53,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
 
   @override
   Stream<List<TransactionItem>> watchTransactions(String roomId) {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       _localTransactionsController ??= StreamController<List<TransactionItem>>.broadcast(
         onListen: () async {
           final initial = await _getLocalTransactions(roomId);
@@ -79,7 +79,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
 
   @override
   Future<void> saveTransaction(String roomId, TransactionItem transaction) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _saveLocalTransaction(roomId, transaction);
       return;
     }
@@ -97,7 +97,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
 
   @override
   Future<void> deleteTransaction(String roomId, String transactionId) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _deleteLocalTransaction(roomId, transactionId);
       return;
     }
@@ -115,7 +115,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
 
   @override
   Future<void> updateCreatorNameForUser(String roomId, String userId, String newName) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       final list = await _getLocalTransactions(roomId);
       bool changed = false;
       for (int i = 0; i < list.length; i++) {

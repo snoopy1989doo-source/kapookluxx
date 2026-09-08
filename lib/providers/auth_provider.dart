@@ -215,34 +215,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> loginAsGuest() async {
-    state = AuthState.loading();
-    try {
-      await _repository.loginAsGuest();
-      final uid = _repository.currentUserId;
-      if (uid != null) {
-        // Ensure guest has a profile doc for syncing
-        final existing = await _profileRepo.getUserProfile(uid);
-        if (existing == null) {
-          final profile = UserProfile(
-            id: uid,
-            email: 'guest_$uid@kapookluxx.com',
-            nickname: 'ต๋อง/ฝน (เกสต์)',
-            photoBase64: null,
-            coupleRoomId: null,
-            createdAt: DateTime.now(),
-          );
-          await _profileRepo.saveProfile(profile);
-        }
-        state = AuthState.authenticated(uid);
-      } else {
-        state = AuthState.error('ไม่สามารถเข้าสู่ระบบแบบเกสต์ได้');
-      }
-    } catch (e) {
-      state = AuthState.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบแบบเกสต์: $e');
-    }
-  }
-
   Future<void> signOut() async {
     state = AuthState.loading();
     await _repository.signOut();

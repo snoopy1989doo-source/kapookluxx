@@ -44,7 +44,7 @@ class WalletSelectorSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 18),
           const Text(
-            'เลือกกระเป๋าเงิน / บัญชี',
+            'เลือกกระเป๋าเงิน',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

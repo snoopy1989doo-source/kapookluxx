@@ -25,7 +25,7 @@ class FirebaseStorageRepository implements StorageRepository {
 
   @override
   Future<String> uploadReceiptImage(String userId, String transactionId, File file) async {
-    if (_useLocalMock || userId == 'guest_user') {
+    if (_useLocalMock) {
       return _saveLocalMockImage(transactionId, file);
     }
     try {

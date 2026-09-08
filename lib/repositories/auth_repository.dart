@@ -10,7 +10,6 @@ abstract class AuthRepository {
   Future<String?> signUpWithEmailAndPassword(String email, String password);
   Future<String?> signInWithGoogle();
   Future<void> signOut();
-  Future<void> loginAsGuest();
 }
 
 class FirebaseAuthRepository implements AuthRepository {
@@ -139,22 +138,6 @@ class FirebaseAuthRepository implements AuthRepository {
       return;
     }
     await _firebaseAuth!.signOut();
-  }
-
-  @override
-  Future<void> loginAsGuest() async {
-    if (_useLocalMock) {
-      await _prefs.setString('mock_userId', 'guest_user');
-      _mockAuthStreamController.add('guest_user');
-      return;
-    }
-    try {
-      final credential = await _firebaseAuth!.signInAnonymously();
-      await _prefs.setString('mock_userId', credential.user?.uid ?? 'guest_user');
-    } catch (e) {
-      await _prefs.setString('mock_userId', 'guest_user');
-      _mockAuthStreamController.add('guest_user');
-    }
   }
 
   String _translateFirebaseError(String code) {

@@ -161,7 +161,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
             children: [
               SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
               SizedBox(width: 12),
-              Text('🤖 AI กำลังสแกนอ่านข้อความและยอดเงินจากสลิป...'),
+              Text('กำลังอ่านข้อความและยอดเงินจากสลิป...'),
             ],
           ),
           duration: Duration(seconds: 4),
@@ -291,7 +291,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
         }
         final walletObj = ref.read(walletsProvider).where((w) => w.id == matchedWallet).firstOrNull;
         final subObj = subCats.where((s) => s.id == matchedSubCategory).firstOrNull;
-        aiMemoryReason = '✨ AI จำได้: ร้าน "$_detectedReceiverName"${walletObj != null ? " จ่ายด้วย ${walletObj.name}" : ""}${subObj != null ? " ในหมวด ${subObj.name}" : ""}';
+        aiMemoryReason = '✨ จำร้านนี้ได้: "$_detectedReceiverName"${walletObj != null ? " จ่ายด้วย ${walletObj.name}" : ""}${subObj != null ? " ในหมวด ${subObj.name}" : ""}';
         debugPrint('✨ AI predicted category & wallet from memory for $_detectedReceiverName');
       }
     }
@@ -475,9 +475,9 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
         successMsg = aiMemoryReason;
       } else if (matchedAmount != null) {
         if (_receiptImagesList.length > 1 && finalTotalAmount != null) {
-          successMsg = '✨ AI สแกนสลิปเพิ่มสำเร็จ! (+฿${matchedAmount.toStringAsFixed(2)}) รวมยอดบิลเป็น ฿${finalTotalAmount.toStringAsFixed(2)}';
+          successMsg = '✨ อ่านสลิปเพิ่มสำเร็จ! (+฿${matchedAmount.toStringAsFixed(2)}) รวมยอดบิลเป็น ฿${finalTotalAmount.toStringAsFixed(2)}';
         } else {
-          successMsg = '✨ AI สแกนอ่านสลิปสำเร็จ! เติมยอดเงิน ฿${matchedAmount.toStringAsFixed(2)} ให้อัตโนมัติแล้ว';
+          successMsg = '✨ อ่านสลิปสำเร็จ! เติมยอดเงิน ฿${matchedAmount.toStringAsFixed(2)} ให้อัตโนมัติแล้ว';
         }
       } else {
         successMsg = '📸 แนบรูปสลิปเรียบร้อยแล้ว กรุณากรอกจำนวนเงิน หรือกดปุ่ม 🧮 เพื่อคิดเลขได้เลยครับ';
@@ -1501,7 +1501,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                     // Wallet Selector dropdown
                     DropdownButtonFormField<String>(
                       value: _selectedWalletId,
-                      decoration: const InputDecoration(labelText: 'เลือกกระเป๋าเงิน / บัญชี'),
+                      decoration: const InputDecoration(labelText: 'เลือกกระเป๋าเงิน'),
                       items: wallets.map((wallet) {
                         return DropdownMenuItem<String>(
                           value: wallet.id,
@@ -1681,7 +1681,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                       ],
                     ),
                     Text(
-                      'AI อ่านยอดเงิน & กรอกข้อมูลให้อัตโนมัติ',
+                      'อ่านยอดเงินและช่วยกรอกข้อมูลให้อัตโนมัติ',
                       style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     ),
                   ],
@@ -1722,7 +1722,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '🤖 Gemini AI กำลังอ่านยอดเงินจากสลิป...',
+                        'กำลังอ่านยอดเงินจากสลิป...',
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.bold,
@@ -1811,7 +1811,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'เปิดแกลเลอรีทันที • AI อ่านยอดเงิน & เลือกหมวดให้อัตโนมัติ',
+                      'เปิดแกลเลอรีทันที • อ่านยอดเงินและเลือกหมวดให้อัตโนมัติ',
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -1822,7 +1822,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildFeatureChip(icon: Icons.flash_on_rounded, label: 'อ่านใน 1 วิ', theme: theme),
+                        _buildFeatureChip(icon: Icons.flash_on_rounded, label: 'อ่านยอดอัตโนมัติ', theme: theme),
                         const SizedBox(width: 6),
                         _buildFeatureChip(icon: Icons.account_balance_rounded, label: 'สลิปทุกธนาคาร', theme: theme),
                         const SizedBox(width: 6),
@@ -1905,10 +1905,28 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                               fit: StackFit.expand,
                               children: [
                                 imgStr.startsWith('data:image')
-                                    ? Image.memory(base64Decode(imgStr.split(',').last), fit: BoxFit.cover)
+                                    ? Image.memory(
+                                        base64Decode(imgStr.split(',').last),
+                                        fit: BoxFit.cover,
+                                        cacheWidth: 180,
+                                        cacheHeight: 180,
+                                        filterQuality: FilterQuality.low,
+                                      )
                                     : (imgStr.startsWith('http')
-                                        ? Image.network(imgStr, fit: BoxFit.cover)
-                                        : Image.file(File(imgStr), fit: BoxFit.cover)),
+                                        ? Image.network(
+                                            imgStr,
+                                            fit: BoxFit.cover,
+                                            cacheWidth: 180,
+                                            cacheHeight: 180,
+                                            filterQuality: FilterQuality.low,
+                                          )
+                                        : Image.file(
+                                            File(imgStr),
+                                            fit: BoxFit.cover,
+                                            cacheWidth: 180,
+                                            cacheHeight: 180,
+                                            filterQuality: FilterQuality.low,
+                                          )),
                                 // Bottom badge
                                 Positioned(
                                   bottom: 0,
@@ -1960,7 +1978,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
               ),
             ),
             const SizedBox(height: 10),
-            // AI Status Ribbon with interactive "เปลี่ยนรูป" button
+            // Slip status ribbon with interactive "เปลี่ยนรูป" button
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
@@ -1975,7 +1993,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                   Expanded(
                     child: Text(
                       _amountController.text.isNotEmpty
-                          ? 'AI สแกนอ่านยอด ฿${_amountController.text} เรียบร้อย ✨'
+                          ? 'อ่านยอด ฿${_amountController.text} เรียบร้อย ✨'
                           : 'แนบสลิปเรียบร้อย พร้อมบันทึก ✨',
                       style: TextStyle(
                         fontSize: 11,

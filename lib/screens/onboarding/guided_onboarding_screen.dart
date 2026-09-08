@@ -238,7 +238,7 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('เพิ่มกระเป๋าเงิน / บัญชี'),
+          title: const Text('เพิ่มกระเป๋าเงิน'),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -247,7 +247,7 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
                 controller: _customNameController,
                 decoration: const InputDecoration(
                   labelText: 'ชื่อกระเป๋าเงิน',
-                  hintText: 'เช่น เงินสด, บัญชีกรุงไทย',
+                  hintText: 'เช่น เงินสด, กรุงไทย',
                 ),
               ),
               const SizedBox(height: 16),
@@ -491,12 +491,12 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'ตั้งค่ากระเป๋าเงิน & บัญชี (Wallets)',
+              'ตั้งค่ากระเป๋าเงิน (Wallets)',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
-              'ระบุบัญชีที่คุณใช้งานประจำ พร้อมกรอกยอดเงินเริ่มต้น (เงินสด, บัญชีธนาคาร)',
+              'เลือกกระเป๋าเงินที่ใช้งานประจำ พร้อมกรอกยอดเงินเริ่มต้น (เช่น เงินสดหรือธนาคาร)',
               style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
             ),
             const SizedBox(height: 20),
@@ -553,7 +553,7 @@ class _GuidedOnboardingScreenState extends ConsumerState<GuidedOnboardingScreen>
             OutlinedButton.icon(
               onPressed: _showAddCustomWallet,
               icon: const Icon(Icons.add),
-              label: const Text('เพิ่มบัญชี/กระเป๋าเงินใหม่'),
+              label: const Text('เพิ่มกระเป๋าเงินใหม่'),
               style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
             ),
           ],

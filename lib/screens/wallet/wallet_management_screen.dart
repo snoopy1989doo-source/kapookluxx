@@ -61,7 +61,7 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
           final previewCurrent = startVal + accumulatedTx;
 
           return AlertDialog(
-            title: Text(existing == null ? 'เพิ่มกระเป๋าเงิน / บัญชี' : 'แก้ไขกระเป๋าเงิน'),
+            title: Text(existing == null ? 'เพิ่มกระเป๋าเงิน' : 'แก้ไขกระเป๋าเงิน'),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             content: SingleChildScrollView(
               child: Column(
@@ -71,8 +71,8 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
                   TextField(
                     controller: _nameController,
                     decoration: const InputDecoration(
-                      labelText: 'ชื่อบัญชี / กระเป๋าเงิน',
-                      hintText: 'เช่น เงินสด, บัญชีกสิกรไทย, Make',
+                      labelText: 'ชื่อกระเป๋าเงิน',
+                      hintText: 'เช่น เงินสด, กสิกรไทย, Make',
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -82,9 +82,9 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
                     controller: startBalController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
-                      labelText: 'ยอดเงินเริ่มต้นในบัญชี (บาท)',
+                      labelText: 'ยอดเงินเริ่มต้น (บาท)',
                       hintText: '0.00',
-                      helperText: 'เงินที่มีอยู่ในบัญชีก่อนเริ่มบันทึกในแอป',
+                      helperText: 'เงินที่มีอยู่ก่อนเริ่มบันทึกในแอป',
                     ),
                     onChanged: (val) {
                       setDialogState(() {
@@ -250,7 +250,7 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('กระเป๋าเงิน & บัญชี'),
+        title: const Text('กระเป๋าเงิน'),
       ),
       body: Column(
         children: [
@@ -278,7 +278,7 @@ class _WalletManagementScreenState extends ConsumerState<WalletManagementScreen>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'หากกระเป๋าเงินติดลบ แปลว่ามีบันทึกรายจ่ายมากกว่าเงินตั้งต้น สามารถกดแก้ไข ✏️ เพื่อใส่เงินเริ่มต้นที่มีจริงในบัญชีได้เลยครับ',
+                        'หากกระเป๋าเงินติดลบ แปลว่ามีบันทึกรายจ่ายมากกว่าเงินตั้งต้น สามารถกดแก้ไข ✏️ เพื่อใส่ยอดเงินเริ่มต้นตามเงินจริงได้เลยครับ',
                         style: TextStyle(fontSize: 11, color: Colors.blue.shade900, height: 1.35),
                       ),
                     ],

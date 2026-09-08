@@ -30,7 +30,7 @@ class FirestoreWalletRepository implements WalletRepository {
 
   @override
   Future<List<Wallet>> getWallets(String roomId) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       return _getLocalWallets(roomId);
     }
     try {
@@ -56,7 +56,7 @@ class FirestoreWalletRepository implements WalletRepository {
 
   @override
   Future<void> saveWallet(String roomId, Wallet wallet) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _saveLocalWallet(roomId, wallet);
       return;
     }
@@ -74,7 +74,7 @@ class FirestoreWalletRepository implements WalletRepository {
 
   @override
   Future<void> deleteWallet(String roomId, String walletId) async {
-    if (_useLocalMock || roomId == 'guest_user') {
+    if (_useLocalMock) {
       await _deleteLocalWallet(roomId, walletId);
       return;
     }

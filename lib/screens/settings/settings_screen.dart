@@ -278,6 +278,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
     }
 
+    void showSlipPrivacyInfo() {
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          icon: const Icon(Icons.shield_outlined, color: AppColors.primary),
+          title: const Text('ความเป็นส่วนตัวของสลิป'),
+          content: const Text(
+            'เมื่อใช้สแกนสลิป รูปจะถูกส่งไป OCR.space เพื่ออ่านข้อความและจำนวนเงิน '
+            'จากนั้นแอปจะแนบรูปกับรายการเมื่อคุณกดบันทึก เราไม่พิมพ์ข้อความหรือข้อมูลจากสลิปลง Console',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('เข้าใจแล้ว'),
+            ),
+          ],
+        ),
+      );
+    }
+
     final partnerProfile = ref.watch(partnerProfileProvider).value;
 
     final partnerPhotoUrl = partnerProfile?.photoBase64;
@@ -628,7 +648,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // ─── SECTION 1: FINANCIAL CATEGORIES & WALLETS ───
           _buildSectionCard(
             context: context,
-            title: 'หมวดหมู่ & กระเป๋าเงิน',
+            title: 'การเงิน',
             children: [
               _buildSettingTile(
                 context: context,
@@ -636,7 +656,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 iconColor: const Color(0xFFFF6584),
                 iconBgColor: const Color(0xFFFF6584).withOpacity(0.12),
                 title: 'หมวดหมู่รายรับ-รายจ่าย',
-                subtitle: 'จัดการหมวดและ Emoji',
+                subtitle: 'จัดการหมวดหมู่ สี และอีโมจิ',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -667,7 +687,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // ─── SECTION 2: DISPLAY ───
           _buildSectionCard(
             context: context,
-            title: 'การแสดงผล',
+            title: 'รูปลักษณ์',
             children: [
               _buildSettingTile(
                 context: context,
@@ -692,6 +712,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             context: context,
             title: 'ข้อมูลและการใช้งาน',
             children: [
+              _buildSettingTile(
+                context: context,
+                icon: Icons.shield_outlined,
+                iconColor: Colors.blue.shade700,
+                iconBgColor: Colors.blue.shade50,
+                title: 'ความเป็นส่วนตัวของสลิป',
+                subtitle: 'ดูวิธีประมวลผลและจัดเก็บรูปสลิป',
+                onTap: showSlipPrivacyInfo,
+              ),
               _buildSettingTile(
                 context: context,
                 icon: Icons.restart_alt_rounded,

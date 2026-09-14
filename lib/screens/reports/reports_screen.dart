@@ -24,6 +24,7 @@ class ReportsScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportsScreenState extends ConsumerState<ReportsScreen> {
+  int _reportSectionIndex = 0;
   int _splitFilterIndex = 0; // 0: ทั้งหมด, 1: กองกลาง, 2: ส่วนตัว
   bool _showAllCategories = false;
   int _touchedCategoryIndex = -1;
@@ -158,6 +159,42 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildReportSectionChip(
+    BuildContext context, {
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final selected = _reportSectionIndex == index;
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        selected: selected,
+        showCheckmark: false,
+        avatar: Icon(
+          icon,
+          size: 17,
+          color: selected ? colors.onPrimary : colors.onSurfaceVariant,
+        ),
+        label: Text(label),
+        labelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+          color: selected ? colors.onPrimary : colors.onSurfaceVariant,
+        ),
+        selectedColor: AppColors.brandStart,
+        backgroundColor: colors.surface,
+        side: BorderSide(
+          color: selected
+              ? AppColors.brandStart
+              : colors.outlineVariant.withOpacity(0.7),
+        ),
+        onSelected: (_) => setState(() => _reportSectionIndex = index),
       ),
     );
   }
@@ -377,8 +414,42 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildReportSectionChip(
+                    context,
+                    index: 0,
+                    icon: Icons.space_dashboard_outlined,
+                    label: 'ภาพรวม',
+                  ),
+                  _buildReportSectionChip(
+                    context,
+                    index: 1,
+                    icon: Icons.people_outline_rounded,
+                    label: 'คู่เรา',
+                  ),
+                  _buildReportSectionChip(
+                    context,
+                    index: 2,
+                    icon: Icons.pie_chart_outline_rounded,
+                    label: 'หมวดหมู่',
+                  ),
+                  _buildReportSectionChip(
+                    context,
+                    index: 3,
+                    icon: Icons.flag_outlined,
+                    label: 'เป้าหมาย',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
             // 1. HERO SUMMARY CARD (Shared Cashflow Card)
-            Container(
+            if (_reportSectionIndex == 0) ...[
+              Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -554,11 +625,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
+            ],
 
             // 2. COUPLE CONTRIBUTION SPLIT ("Our Spending Ratio")
-            Card(
+            if (_reportSectionIndex == 1) ...[
+              Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
@@ -749,11 +822,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
+            ],
 
             // 3. WHERE DID OUR MONEY GO? (Lifestyle Breakdown: Donut Chart + Right-Side Details)
-            Card(
+            if (_reportSectionIndex == 2) ...[
+              Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
@@ -936,11 +1011,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
+            ],
 
             // 4. COUPLE LIFESTYLE MILESTONE (บันทึกช่วงเวลาแห่งความสุขคู่เรา 🍿)
-            Card(
+            if (_reportSectionIndex == 3) ...[
+              Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
@@ -1073,12 +1150,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
 
             // 5. GENTLE TAX DEDUCTIBLE SECTION (If Any)
-            if (report.totalTaxDeductible > 0)
-              Container(
+              if (report.totalTaxDeductible > 0)
+                Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: _lavenderPastel.withOpacity(0.08),
@@ -1113,7 +1190,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     ),
                   ],
                 ),
-              ),
+                ),
+            ],
           ],
         ),
       ),

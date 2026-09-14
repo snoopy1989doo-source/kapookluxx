@@ -52,6 +52,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
   String? _existingImageUrl;
   final List<String> _receiptImagesList = []; // Multi-image support
   bool _isScanningSlip = false; // Scanning animation state
+  bool _isSlipScannerExpanded = false;
   bool _isSaving = false;
   String? _detectedReceiverName; // Merchant / receiver memory used after OCR
 
@@ -163,6 +164,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
         final bytes = await pickedFile.readAsBytes();
         final base64Str = 'data:image/jpeg;base64,${base64Encode(bytes)}';
         setState(() {
+          _isSlipScannerExpanded = true;
           _selectedImageFile = File(pickedFile.path);
           _existingImageUrl = base64Str;
           if (!_receiptImagesList.contains(base64Str)) {
@@ -222,7 +224,6 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
         final data = jsonDecode(response.body);
         if (data['ParsedResults'] != null && (data['ParsedResults'] as List).isNotEmpty) {
           extractedText = (data['ParsedResults'][0]['ParsedText'] ?? '').toString();
-          debugPrint('Dart OCR Parsed Text: $extractedText');
         }
       }
     } catch (e) {
@@ -1675,12 +1676,12 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFFF6584), Color(0xFFFF8E72)],
+                    colors: [AppColors.brandStart, AppColors.brandEnd],
                   ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF6584).withOpacity(0.3),
+                      color: AppColors.brandStart.withOpacity(0.3),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -1731,9 +1732,39 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                 constraints: const BoxConstraints(),
                 onPressed: () => _pickImage(ImageSource.camera),
               ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(
+                  _isSlipScannerExpanded
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                ),
+                tooltip: _isSlipScannerExpanded ? 'ย่อส่วนสแกนสลิป' : 'ดูตัวเลือกสแกนสลิป',
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onPressed: () => setState(() {
+                  _isSlipScannerExpanded = !_isSlipScannerExpanded;
+                }),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
+          if (!_isSlipScannerExpanded &&
+              !_isScanningSlip &&
+              _receiptImagesList.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+                  label: const Text('เลือกรูปสลิป'),
+                ),
+              ),
+            )
+          else ...[
+            const SizedBox(height: 14),
 
           // State 1: Scanning In Progress
           if (_isScanningSlip) ...[
@@ -1863,6 +1894,16 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                         const SizedBox(width: 6),
                         _buildFeatureChip(icon: Icons.auto_fix_high_rounded, label: 'กรอกยอดออโต้', theme: theme),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'ความเป็นส่วนตัว: รูปจะถูกส่งไป OCR.space เพื่ออ่านข้อความ และแนบกับรายการเมื่อคุณกดบันทึก',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        height: 1.35,
+                        color: theme.colorScheme.onSurface.withOpacity(0.48),
+                      ),
                     ),
                   ],
                 ),
@@ -2063,6 +2104,7 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
                 ],
               ),
             ),
+          ],
           ],
         ],
       ),

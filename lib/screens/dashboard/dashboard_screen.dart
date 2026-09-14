@@ -213,8 +213,8 @@ class DashboardScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
-                        Color(0xFFFF6584),
-                        Color(0xFFFF8E72),
+                        AppColors.brandStart,
+                        AppColors.brandEnd,
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -222,7 +222,7 @@ class DashboardScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFF6584).withOpacity(0.3),
+                        color: AppColors.brandStart.withOpacity(0.3),
                         blurRadius: 14,
                         offset: const Offset(0, 6),
                       ),
@@ -359,113 +359,76 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 14),
 
-                // 3. Quick Action Grid (4 Clean Minimalist Buttons in One Row)
-                Row(
-                  children: [
-                    // 1. Scan Slip
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AddEditTransactionScreen()),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6584).withOpacity(theme.brightness == Brightness.dark ? 0.16 : 0.08),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFFFF6584).withOpacity(theme.brightness == Brightness.dark ? 0.35 : 0.2)),
-                          ),
-                          child: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.qr_code_scanner, size: 18, color: Color(0xFFFF6584)),
-                              SizedBox(height: 4),
-                              Text('สแกนสลิป', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFF6584))),
-                            ],
+                // 3. Primary action and a quieter group of couple tools.
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.55)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AddEditTransactionScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.document_scanner_rounded, size: 20),
+                          label: const Text('เพิ่มรายการหรือสแกนสลิป'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // 2. Money Planner (เตรียมเงิน)
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => MoneyPlannerDialog.show(context),
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.dark ? Colors.indigo.withOpacity(0.18) : Colors.indigo.shade50,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: theme.brightness == Brightness.dark ? Colors.indigo.withOpacity(0.35) : Colors.indigo.shade200),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.account_balance_wallet, size: 18, color: theme.brightness == Brightness.dark ? const Color(0xFFA5B4FC) : Colors.indigo.shade700),
-                              const SizedBox(height: 4),
-                              Text('เตรียมเงิน 📋', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? const Color(0xFFA5B4FC) : Colors.indigo.shade700)),
-                            ],
-                          ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'เครื่องมือคู่รัก',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface.withOpacity(0.55),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // 3. Food Wheel
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => FoodDecisionWheelDialog.show(context),
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.dark ? Colors.orange.withOpacity(0.18) : Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: theme.brightness == Brightness.dark ? Colors.orange.withOpacity(0.35) : Colors.orange.shade200),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildCoupleToolButton(
+                              context,
+                              icon: Icons.account_balance_wallet_outlined,
+                              label: 'เตรียมเงิน',
+                              onTap: () => MoneyPlannerDialog.show(context),
+                            ),
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.casino, size: 18, color: theme.brightness == Brightness.dark ? const Color(0xFFFDBA74) : Colors.orange.shade800),
-                              const SizedBox(height: 4),
-                              Text('กินอะไรดี? 🎰', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? const Color(0xFFFDBA74) : Colors.orange.shade800)),
-                            ],
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildCoupleToolButton(
+                              context,
+                              icon: Icons.casino_outlined,
+                              label: 'กินอะไรดี?',
+                              onTap: () => FoodDecisionWheelDialog.show(context),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildCoupleToolButton(
+                              context,
+                              icon: Icons.calendar_month_outlined,
+                              label: 'ปฏิทินรัก',
+                              onTap: () => CoupleCalendarDialog.show(context),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // 4. Love Calendar
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => CoupleCalendarDialog.show(context),
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.dark ? Colors.pink.withOpacity(0.18) : Colors.pink.shade50,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: theme.brightness == Brightness.dark ? Colors.pink.withOpacity(0.35) : Colors.pink.shade200),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.calendar_month, size: 18, color: theme.brightness == Brightness.dark ? const Color(0xFFF472B6) : Colors.pink.shade700),
-                              const SizedBox(height: 4),
-                              Text('ปฏิทินรัก 📅', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? const Color(0xFFF472B6) : Colors.pink.shade700)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 14),
 
@@ -733,6 +696,41 @@ class DashboardScreen extends ConsumerWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCoupleToolButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withOpacity(
+            theme.brightness == Brightness.dark ? 0.14 : 0.06,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 19, color: theme.colorScheme.primary),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
       ),
     );

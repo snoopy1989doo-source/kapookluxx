@@ -31,14 +31,27 @@
   <script src="jsqr.min.js"></script>
   <script src="promptparse.min.js"></script>
 
-  <!-- Tesseract.js OCR for Slip Text Recognition Fallback -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
   <script>
+    let tesseractLoader;
+
+    function loadTesseractOnDemand() {
+      if (window.Tesseract) return Promise.resolve(window.Tesseract);
+      if (tesseractLoader) return tesseractLoader;
+
+      tesseractLoader = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+        script.async = true;
+        script.onload = () => resolve(window.Tesseract);
+        script.onerror = () => reject(new Error('Unable to load the OCR fallback'));
+        document.head.appendChild(script);
+      });
+      return tesseractLoader;
+    }
+
     // PromptParse & ITMX BOT EMVCo Thai Bank Slip Verification Payload Decoder
     function decodeThaiSlipQR(qrData) {
       if (!qrData) return null;
-      console.log("🔍 Decoding Raw Slip QR Data with PromptParse:", qrData);
 
       // 1. Local PromptParse Library Decoding
       try {
@@ -104,7 +117,6 @@
         let imageData = ctx.getImageData(0, 0, cropW, cropH);
         let code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
         if (code && code.data) {
-          console.log("⚡ QR Code Found in Bottom-Right Quadrant Crop!");
           return code.data;
         }
       } catch (e) {}
@@ -113,7 +125,6 @@
     }
 
     window.parseSlipOCR = async function(base64Image) {
-      console.log("⚡ Starting Ultra-Accurate Multi-Tier Slip Pipeline...");
       let combinedText = "";
 
       const img = new Image();
@@ -127,7 +138,6 @@
       try {
         const rawQrData = scanQRMultiPass(img);
         if (rawQrData) {
-          console.log("🎉 QR Found:", rawQrData);
           combinedText += "QR_DATA: " + rawQrData + "\n";
           const amount = decodeThaiSlipQR(rawQrData);
           if (amount) {
@@ -138,9 +148,8 @@
         console.warn("QR Scan Exception:", qrErr);
       }
 
-      // 2. High-Accuracy AI/OCR Cloud Engine (< 1s, Perfect Thai & Numbers)
+      // 2. Thai cloud OCR
       try {
-        console.log("🚀 Running High-Accuracy Thai OCR Engine...");
         const formData = new URLSearchParams();
         formData.append('base64Image', base64Image);
         formData.append('language', 'tha');
@@ -157,7 +166,6 @@
           const json = await res.json();
           if (json && json.ParsedResults && json.ParsedResults.length > 0) {
             const parsedText = json.ParsedResults[0].ParsedText || "";
-            console.log("✅ High-Accuracy OCR Response:\n", parsedText);
             combinedText += "\n" + parsedText;
             return combinedText;
           }
@@ -168,6 +176,7 @@
 
       // 3. Fallback: Local Tesseract OCR with fast CDN langPath
       try {
+        await loadTesseractOnDemand();
         if (window.Tesseract && typeof Tesseract.recognize === 'function') {
           const ret = await Tesseract.recognize(base64Image, 'eng', {
             langPath: 'https://cdn.jsdelivr.net/gh/naptha/tessdata@gh-pages/4.0.0'

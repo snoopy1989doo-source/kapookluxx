@@ -11,6 +11,7 @@ import '../../providers/couple_provider.dart';
 import '../../models/transaction_item.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/name_helper.dart';
+import '../../core/constants/app_colors.dart';
 
 class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
@@ -189,7 +190,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final isSelected = _currentIndex == index;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    const activeColor = Color(0xFFFF6584);
+    const activeColor = AppColors.brandStart;
 
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),

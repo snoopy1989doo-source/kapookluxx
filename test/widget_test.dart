@@ -12,6 +12,7 @@ import 'package:expense_tracker/providers/transaction_provider.dart';
 import 'package:expense_tracker/widgets/wallet/wallet_card.dart';
 import 'package:expense_tracker/widgets/wallet/wallet_icon.dart';
 import 'package:expense_tracker/widgets/common/app_picker_field.dart';
+import 'package:expense_tracker/widgets/common/kapook_logo.dart';
 
 void main() {
   setUpAll(() async {
@@ -66,6 +67,20 @@ void main() {
   });
 
   group('Compact picker layout tests', () {
+    testWidgets('renders the fixed Kapookluxx brand logo', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Center(child: KapookLogo()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Image), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('keeps category text separated at mobile width', (tester) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1;

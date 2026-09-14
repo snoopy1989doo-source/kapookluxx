@@ -6,6 +6,10 @@ class AppColors {
   static const Color primaryDark = Color(0xFFC2185B);
   static const Color primaryLight = Color(0xFFFCE4EC);
   static const Color accent = Color(0xFFFF4081);
+  static const Color brandStart = Color(0xFFE91E63);
+  static const Color brandEnd = Color(0xFFFF7A73);
+  static const Color couplePurple = Color(0xFF7C5CE7);
+  static const Color warmAmber = Color(0xFFF59E0B);
 
   // Financial Indicators
   static const Color income = Color(0xFF2E7D32);      // Green
@@ -17,7 +21,7 @@ class AppColors {
   static const Color taxDeductibleLight = Color(0xFFF3E5F5);
 
   // Neutral / Background Light
-  static const Color backgroundLight = Color(0xFFF8F9FA);
+  static const Color backgroundLight = Color(0xFFF7F8FC);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color textPrimaryLight = Color(0xFF212121);

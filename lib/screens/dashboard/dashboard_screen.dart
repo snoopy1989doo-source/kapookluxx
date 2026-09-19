@@ -25,6 +25,7 @@ import '../../widgets/couple/couple_calendar_dialog.dart';
 import '../../widgets/budget/subcategory_budget_widget.dart';
 import '../../models/transaction_item.dart';
 import '../transaction/add_edit_transaction_screen.dart';
+import '../memory/memory_ticket_gallery_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   final VoidCallback onNavigateToTransactions;
@@ -397,33 +398,44 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 2.7,
                         children: [
-                          Expanded(
-                            child: _buildCoupleToolButton(
-                              context,
-                              icon: Icons.account_balance_wallet_outlined,
-                              label: 'เตรียมเงิน',
-                              onTap: () => MoneyPlannerDialog.show(context),
-                            ),
+                          _buildCoupleToolButton(
+                            context,
+                            icon: Icons.confirmation_number_outlined,
+                            label: 'Memory Ticket',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MemoryTicketGalleryScreen(),
+                                ),
+                              );
+                            },
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildCoupleToolButton(
-                              context,
-                              icon: Icons.casino_outlined,
-                              label: 'กินอะไรดี?',
-                              onTap: () => FoodDecisionWheelDialog.show(context),
-                            ),
+                          _buildCoupleToolButton(
+                            context,
+                            icon: Icons.account_balance_wallet_outlined,
+                            label: 'เตรียมเงิน',
+                            onTap: () => MoneyPlannerDialog.show(context),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildCoupleToolButton(
-                              context,
-                              icon: Icons.calendar_month_outlined,
-                              label: 'ปฏิทินรัก',
-                              onTap: () => CoupleCalendarDialog.show(context),
-                            ),
+                          _buildCoupleToolButton(
+                            context,
+                            icon: Icons.casino_outlined,
+                            label: 'กินอะไรดี?',
+                            onTap: () => FoodDecisionWheelDialog.show(context),
+                          ),
+                          _buildCoupleToolButton(
+                            context,
+                            icon: Icons.calendar_month_outlined,
+                            label: 'ปฏิทินรัก',
+                            onTap: () => CoupleCalendarDialog.show(context),
                           ),
                         ],
                       ),
@@ -719,16 +731,21 @@ class DashboardScreen extends ConsumerWidget {
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 19, color: theme.colorScheme.primary),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+            const SizedBox(width: 7),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
